@@ -108,4 +108,25 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Get all comments in a specified post
+router.get("/:postID/comments", async (req, res) => {
+  const { postID } = req.params;
+
+  try {
+    const getPostID = await Posts.findById(postID);
+    if (!getPostID) {
+      res
+        .status(404)
+        .json({ message: `The post with id ${postID} does not exist` });
+    } else {
+      const comments = await Posts.findPostComments(postID);
+      res.json(comments);
+    }
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "The comments information could not be retrieved" });
+  }
+});
+
 module.exports = router;
