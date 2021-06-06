@@ -1,5 +1,5 @@
 // implement your posts router here
-const express = "express";
+const express = require("express");
 const Posts = require("./posts-model");
 
 const router = express.Router();
@@ -36,7 +36,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //Create new post
-router.post("/api/posts", async (req, res) => {
+router.post("/", async (req, res) => {
   const post = req.body;
 
   try {
@@ -46,8 +46,7 @@ router.post("/api/posts", async (req, res) => {
         .json({ message: "Please provide title and contents for the post" });
     } else {
       const getId = await Posts.insert(post);
-      //const newPost = { ...getId, title: post.title, contents: post.contents };
-      const newPost = await Posts.findById(getId);
+      const newPost = await Posts.findById(getId.id);
       res.status(201).json(newPost);
     }
   } catch (err) {
@@ -58,7 +57,7 @@ router.post("/api/posts", async (req, res) => {
 });
 
 // Update post
-router.put("/api/posts/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const post = req.body;
 
@@ -68,19 +67,14 @@ router.put("/api/posts/:id", async (req, res) => {
         .status(400)
         .json({ message: "Please provide title and contents for the post" });
     } else {
-      const updatedPost = await db.update(id, post);
-      const newPost = {
-        ...updatedPost,
-        title: post.title,
-        contents: post.contents,
-      };
-      console.log(newPost);
+      const updatedPost = await Posts.update(id, post);
       if (!updatedPost) {
         res
           .status(404)
           .json({ message: `The post with id ${id} does not exist` });
       } else {
-        res.status(200).json(newPost);
+        const postUpdated = await Posts.findById(id);
+        res.status(200).json(postUpdated);
       }
     }
   } catch (err) {
