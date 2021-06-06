@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
   try {
     if (!post.title || !post.contents) {
       res
-        .status(404)
+        .status(400)
         .json({ message: "Please provide title and contents for the post" });
     } else {
       const getId = await Posts.insert(post);
@@ -90,17 +90,15 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deleted = await Posts.remove(id);
+    const deleted = await Posts.findById(id);
     if (!deleted) {
       res
         .status(404)
         .json({ message: `The post with id ${id} does not exist` });
     } else {
-      res.status(200).json({
-        message: "Your post has been deleted",
-        id: id,
-        deleted,
-      });
+      const deletedPost = await Posts.findById(id);
+      res.status(200).json(deletedPost);
+      await Posts.remove(id);
     }
   } catch (err) {
     console.log(err);
